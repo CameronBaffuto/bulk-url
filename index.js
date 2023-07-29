@@ -1,7 +1,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const app = express();
-const port = 3000; // Change this to the desired port number
+const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

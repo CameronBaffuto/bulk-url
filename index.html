@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>URL Redirect Checker</title>
+  <!-- Include Bootstrap 5 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="mt-4">URL Redirect Checker</h1>
+    <form id="urlForm" method="post" class="mt-4">
+      <label for="urls">Enter URLs to Check (comma or new line separated):</label>
+      <textarea id="urls" name="urls" rows="5" required class="form-control"></textarea>
+      <button type="submit" class="btn btn-primary mt-2">Check</button>
+      <div class="mt-2 d-none" id="loadingSpinner">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </form>
+    <div id="resultContainer" class="mt-4"></div>
+  </div>
+
+  <!-- Add the JavaScript code here -->
+  <script>
+const statusCodeDescriptions = {
+        100: 'Continue',
+        101: 'Switching Protocols',
+        200: 'OK',
+        201: 'Created',
+        202: 'Accepted',
+        203: 'Non-Authoritative Information',
+        204: 'No Content',
+        205: 'Reset Content',
+        206: 'Partial Content',
+        300: 'Multiple Choices',
+        301: 'Moved Permanently',
+        302: 'Found',
+        303: 'See Other',
+        304: 'Not Modified',
+        305: 'Use Proxy',
+        307: 'Temporary Redirect',
+        308: 'Permanent Redirect',
+        400: 'Bad Request',
+        401: 'Unauthorized',
+        403: 'Forbidden',
+        404: 'Not Found',
+        405: 'Method Not Allowed',
+        406: 'Not Acceptable',
+        407: 'Proxy Authentication Required',
+        408: 'Request Timeout',
+        409: 'Conflict',
+        410: 'Gone',
+        411: 'Length Required',
+        412: 'Precondition Failed',
+        413: 'Payload Too Large',
+        414: 'URI Too Long',
+        415: 'Unsupported Media Type',
+        416: 'Range Not Satisfiable',
+        417: 'Expectation Failed',
+        418: 'I\'m a teapot',
+        421: 'Misdirected Request',
+        426: 'Upgrade Required',
+        429: 'Too Many Requests',
+        500: 'Internal Server Error',
+        501: 'Not Implemented',
+        502: 'Bad Gateway',
+        503: 'Service Unavailable',
+        504: 'Gateway Timeout',
+        505: 'HTTP Version Not Supported'
+    };
+    
+    document.getElementById('urlForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const urls = formData.get('urls');
+      const responseContainer = document.getElementById('resultContainer');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+
+      // Hide the result container and show the loading spinner
+      responseContainer.classList.add('d-none');
+      loadingSpinner.classList.remove('d-none');
+
+      try {
+        const response = await fetch('/check', {
+          method: 'POST',
+          body: JSON.stringify({ urls }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const results = await response.json();
+          const resultContainer = document.getElementById('resultContainer');
+          resultContainer.innerHTML = '<h2>Results:</h2>';
+          results.forEach((result) => {
+            const card = document.createElement('div');
+            card.classList.add('card', 'mb-3');
+            card.innerHTML = `
+              <div class="card-body">
+                <h5 class="card-title">URL: ${result.url}</h5>
+                <p class="card-text">Redirected to: ${result.redirectedUrl || 'N/A'}</p>
+              </div>
+            `;
+            resultContainer.appendChild(card);
+          });
+        } else {
+          console.error('Error occurred:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error occurred:', error);
+      } finally {
+        // Show the result container and hide the loading spinner
+        responseContainer.classList.remove('d-none');
+        loadingSpinner.classList.add('d-none');
+      }
+    });
+  </script>
+</body>
+</html>

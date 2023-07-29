@@ -1,0 +1,2 @@
+[web]
+command = "node index.js"
